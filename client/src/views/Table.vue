@@ -7,6 +7,7 @@
       :gridOptions="gridOptions"
       @grid-ready="onGridReady"
       :columnDefs="columnDefs"
+      @click="onGridReady(params)"
       :defaultColDef="defaultColDef"
       :enterMovesDown="true"
       :enterMovesDownAfterEdit="true"
@@ -39,8 +40,7 @@ export default {
   },
   methods: {
     onGridReady(params) {
-      this.gridApi = params.api;
-      this.columnApi = params.columnApi;
+       console.log('ok',params)
     },
     getSelectedRows() {
       const selectedNodes = this.gridApi.getSelectedNodes();
@@ -109,5 +109,4 @@ export default {
 };
 </script>
 <style lang="scss" >
-
 </style>
