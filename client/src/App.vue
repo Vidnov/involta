@@ -1,16 +1,17 @@
 <template>
   <div id="app">
-    <Home/>
+   
+    <Table/>
   </div>
 </template>
 <script>
 
-import Home from './views/Home.vue'
+import Table from './views/Table.vue'
 export default {
   
   name: "App",
   components: {
-    Home
+    Table
   },
 }
 </script>
