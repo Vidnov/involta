@@ -1,19 +1,22 @@
 <template>
-  <div style="height: 90vh">
-    <ag-grid-vue
-      style="width: 100%; height: 100%"
-      class="ag-theme-alpine"
-      id="myGrid"
-      :gridOptions="gridOptions"
-      @grid-ready="onGridReady"
-      :columnDefs="columnDefs"
-      @click="onGridReady(params)"
-      :defaultColDef="defaultColDef"
-      :enterMovesDown="true"
-      :enterMovesDownAfterEdit="true"
-      :modules="modules"
-      :rowData="rowData"
-    ></ag-grid-vue>
+  <div>
+    <div style="height: 90vh">
+      <ag-grid-vue
+        style="width: 100%; height: 100%"
+        class="ag-theme-alpine"
+        id="myGrid"
+        @cellClicked="onGridReadys"
+        :gridOptions="gridOptions"
+        @grid-ready="onGridReady"
+        :columnDefs="columnDefs"
+        :defaultColDef="defaultColDef"
+        :enterMovesDown="true"
+        :enterMovesDownAfterEdit="true"
+        :modules="modules"
+        :rowData="rowData"
+      ></ag-grid-vue>
+    </div>
+    <button @click="onGridReadys()">oks</button>
   </div>
 </template>
 
@@ -37,19 +40,6 @@ export default {
       modules: [ClientSideRowModelModule],
       rowData: null,
     };
-  },
-  methods: {
-    onGridReady(params) {
-       console.log('ok',params)
-    },
-    getSelectedRows() {
-      const selectedNodes = this.gridApi.getSelectedNodes();
-      const selectedData = selectedNodes.map((node) => node.data);
-      const selectedDataStringPresentation = selectedData
-        .map((node) => node.make + " " + node.model)
-        .join(", ");
-      alert(`Selected nodes: ${selectedDataStringPresentation}`);
-    },
   },
   beforeMount() {
     this.gridOptions = {};
@@ -88,6 +78,17 @@ export default {
     this.gridColumnApi = this.gridOptions.columnApi;
   },
   methods: {
+    onGridReadys(params) {
+      console.log(params);
+    },
+    getSelectedRows() {
+      // const selectedNodes = this.gridApi.getSelectedNodes();
+      // const selectedData = selectedNodes.map((node) => node.data);
+      // const selectedDataStringPresentation = selectedData
+      //   .map((node) => node.make + " " + node.model)
+      //   .join(", ");
+      // alert(`Selected nodes: ${selectedDataStringPresentation}`);
+    },
     onGridReady(params) {
       const httpRequest = new XMLHttpRequest();
       const updateData = (data) => {
