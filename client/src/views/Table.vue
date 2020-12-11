@@ -16,7 +16,7 @@
         :rowData="rowData"
       ></ag-grid-vue>
     </div>
-    <button @click="onGridReadys()">oks</button>
+  
   </div>
 </template>
 
@@ -24,11 +24,17 @@
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 import { AgGridVue } from "ag-grid-vue";
+import io from "socket.io-client";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 export default {
   name: "Table",
   components: {
     "ag-grid-vue": AgGridVue,
+  },
+  sockets:{
+    connect(){
+      console.log('Client IO')
+    }
   },
   data() {
     return {
