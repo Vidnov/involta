@@ -16,7 +16,6 @@
         :rowData="rowData"
       ></ag-grid-vue>
     </div>
-  
   </div>
 </template>
 
@@ -24,20 +23,26 @@
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 import { AgGridVue } from "ag-grid-vue";
-import io from "socket.io-client";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 export default {
   name: "Table",
   components: {
     "ag-grid-vue": AgGridVue,
   },
-  sockets:{
-    connect(){
-      console.log('Client IO')
-    }
+  sockets: {
+    connect: function () {
+      this.$sockets.emit
+      console.log("socket connected");
+    },
+    customEmit: function (data) {
+      console.log(
+        'this method was fired by the socket server. eg: io.emit("customEmit", data)'
+      );
+    },
   },
   data() {
     return {
+      test:'123',
       gridOptions: null,
       gridApi: null,
       columnApi: null,
@@ -50,28 +55,28 @@ export default {
   beforeMount() {
     this.gridOptions = {};
     this.columnDefs = [
-      {
-        field: "athlete",
+       {
+        field: "Id",
         minWidth: 160,
       },
-      { field: "age" },
       {
-        field: "country",
-        minWidth: 140,
-      },
-      { field: "year" },
-      {
-        field: "date",
-        minWidth: 140,
-      },
-      {
-        field: "sport",
+        field: "First Name",
         minWidth: 160,
       },
-      { field: "gold" },
-      { field: "silver" },
-      { field: "bronze" },
-      { field: "total" },
+      { field: "Last Name" },
+      {
+        field: "Second Name",
+        minWidth: 140,
+      },
+      { field: "Price" },
+      {
+        field: "Status",
+        minWidth: 140,
+      },
+      {
+        field: "Date",
+        minWidth: 160,
+      }
     ];
     this.defaultColDef = {
       flex: 1,
