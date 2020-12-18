@@ -16,6 +16,7 @@
         :rowData="rowData"
       ></ag-grid-vue>
     </div>
+    <button v-on:click="clickButton">Отправить</button>
   </div>
 </template>
 
@@ -24,25 +25,15 @@ import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 import { AgGridVue } from "ag-grid-vue";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
+import axios from 'axios'
 export default {
   name: "Table",
   components: {
     "ag-grid-vue": AgGridVue,
   },
-  sockets: {
-    connect: function () {
-      this.$sockets.emit
-      console.log("socket connected");
-    },
-    customEmit: function (data) {
-      console.log(
-        'this method was fired by the socket server. eg: io.emit("customEmit", data)'
-      );
-    },
-  },
   data() {
     return {
-      test:'123',
+      test: "123",
       gridOptions: null,
       gridApi: null,
       columnApi: null,
@@ -50,12 +41,25 @@ export default {
       defaultColDef: null,
       modules: [ClientSideRowModelModule],
       rowData: null,
+      msg: null,
     };
   },
+  sockets: { //прослушиваем события для получения данных с сервера
+    connect: function () {
+      console.log("socket connected");
+    },
+    test: function (data) {
+      console.log(data)
+    },
+    connet:function(date){
+      console.log(date)
+    }
+  },
+
   beforeMount() {
     this.gridOptions = {};
     this.columnDefs = [
-       {
+      {
         field: "Id",
         minWidth: 160,
       },
@@ -76,7 +80,7 @@ export default {
       {
         field: "Date",
         minWidth: 160,
-      }
+      },
     ];
     this.defaultColDef = {
       flex: 1,
@@ -89,6 +93,12 @@ export default {
     this.gridColumnApi = this.gridOptions.columnApi;
   },
   methods: {
+    clickButton: function () {
+      // $socket is socket.io-client instance
+      console.log("click");
+      this.$socket.emit("test", { data: "test" });
+    },
+
     onGridReadys(params) {
       console.log(params);
     },
@@ -101,21 +111,25 @@ export default {
       // alert(`Selected nodes: ${selectedDataStringPresentation}`);
     },
     onGridReady(params) {
-      const httpRequest = new XMLHttpRequest();
-      const updateData = (data) => {
-        this.rowData = data;
-      };
+      // const httpRequest = new XMLHttpRequest();
+      // const updateData = (data) => {
+      //   this.rowData = data;
+      // };
 
-      httpRequest.open(
-        "GET",
-        "https://raw.githubusercontent.com/ag-grid/ag-grid/master/grid-packages/ag-grid-docs/src/olympicWinnersSmall.json"
-      );
-      httpRequest.send();
-      httpRequest.onreadystatechange = () => {
-        if (httpRequest.readyState === 4 && httpRequest.status === 200) {
-          updateData(JSON.parse(httpRequest.responseText));
-        }
-      };
+      // httpRequest.open(
+      //   "GET",
+      //   "http://localhost:3000/people"
+      // );
+      // httpRequest.send();
+      // httpRequest.onreadystatechange = () => {
+      //   if (httpRequest.readyState === 4 && httpRequest.status === 200) {
+      //     updateData(JSON.parse(httpRequest.responseText));
+      //   }
+      // };
+      axios.get('http://localhost:3000/people')
+      .then(res=>{
+        console.log(res)
+      })
     },
   },
 };
