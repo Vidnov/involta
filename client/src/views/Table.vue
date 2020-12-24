@@ -14,6 +14,7 @@
         :enterMovesDownAfterEdit="true"
         :modules="modules"
         :rowData="rowData"
+        :components="components"
       ></ag-grid-vue>
     </div>
     <button v-on:click="clickButton">Отправить</button>
@@ -23,6 +24,7 @@
 <script>
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
+import GenderCellRenderer from "../components/genderCellRendererVue";
 import { AgGridVue } from "ag-grid-vue";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 import axios from "axios";
@@ -41,6 +43,8 @@ export default {
       modules: [ClientSideRowModelModule],
       rowData: null,
       msg: null,
+      components: null,
+      frameworkComponents: null,
     };
   },
   sockets: {
@@ -48,13 +52,13 @@ export default {
     connect: function () {
       console.log("socket connected");
     },
-    getData: function (data) { //Получаем данные таблицы при загрузке страницы 
+    getData: function (data) {
+      //Получаем данные таблицы при загрузке страницы
       this.rowData = data;
     },
-    conneсt: function (date) {
-  
-    },
-    column: function (data) { //Получаем столбцы таблицы при загрузке страницы 
+    conneсt: function (date) {},
+    column: function (data) {
+      //Получаем столбцы таблицы при загрузке страницы
       this.columnDefs = data;
     },
   },
@@ -68,22 +72,51 @@ export default {
       minWidth: 100,
       editable: true,
     };
+    this.components = { datePicker: getDatePicker() };
   },
   mounted() {
     this.gridApi = this.gridOptions.api;
     this.gridColumnApi = this.gridOptions.columnApi;
   },
   methods: {
-    clickButton: function () { //тестовая отправка данных на сервер
+    clickButton: function () {
+      //тестовая отправка данных на сервер
       this.$socket.emit("test", { data: "test" });
     },
-    onGridReadys(params) { //Получаем данные  ячейки по двойному клику 
+    onGridReadys(params) {
+      //Получаем данные  ячейки по двойному клику
       console.log(params);
     },
     onGridReady(params) {
       this.$socket.emit("dataTable", { data: "test" });
     },
   },
+};
+// Редактирование даты
+window.getDatePicker = function getDatePicker() {
+  function Datepicker() {}
+  Datepicker.prototype.init = function (params) {
+    this.eInput = document.createElement("input");
+    this.eInput.value = params.value;
+    this.eInput.classList.add("ag-input");
+    this.eInput.style.height = "100%";
+    $(this.eInput).datepicker({ dateFormat: "dd/mm/yy" });
+  };
+  Datepicker.prototype.getGui = function () {
+    return this.eInput;
+  };
+  Datepicker.prototype.afterGuiAttached = function () {
+    this.eInput.focus();
+    this.eInput.select();
+  };
+  Datepicker.prototype.getValue = function () {
+    return this.eInput.value;
+  };
+  Datepicker.prototype.destroy = function () {};
+  Datepicker.prototype.isPopup = function () {
+    return false;
+  };
+  return Datepicker;
 };
 </script>
 <style lang="scss" >

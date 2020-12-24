@@ -7,30 +7,50 @@ app.use(cors);
 //Названия и параметры таблицы
 var columnDefs = [
   {
+    headerName: "ID",
     field: "Id",
     minWidth: 160,
   },
   {
+    headerName: "Имя",
     field: "FirstName",
     minWidth: 160,
   },
-  { field: "LastName" },
   {
+    headerName: "Фамилия",
+    field: "LastName",
+    minWidth: 160,
+  },
+  {
+    headerName: "Отчество",
     field: "SecondName",
     minWidth: 140,
   },
-  { field: "Price" },
   {
-    field: "Status",
-    minWidth: 140,
+    headerName: "Оплата",
+    field: "Price",
   },
   {
+    headerName: "Статус",
+    field: "Status",
+    minWidth: 140,
+ //  cellEditor: 'agRichSelectCellEditor',
+    cellEditorParams: {
+      cellHeight: 50,
+      values: ['Ireland', 'USA'],
+    },
+  },
+  {
+    headerName: "Дата Устройства",
     field: "Date",
-    minWidth: 160,
+    editable: true,
+    cellEditor: 'datePicker',
   },
 ];
 
-// Данные таблицы 
+
+
+// Данные таблицы
 var people = [
   {
     Id: "0",
@@ -54,15 +74,15 @@ var people = [
 
 io.on("connection", (socket) => {
   console.log("user connected");
-   //Запрос на получение данных при загрузке страницы
+  //Запрос на получение данных при загрузке страницы
   socket.on("dataTable", () => {
-   //Отправка данных
+    //Отправка данных
     io.emit("getData", people);
   });
 
-  //Запрос на получение названия колонок 
+  //Запрос на получение названия колонок
   socket.on("column", () => {
-      //Отправка колонок
+    //Отправка колонок
     io.emit("column", columnDefs);
   });
 
