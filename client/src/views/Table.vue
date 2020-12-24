@@ -25,7 +25,7 @@ import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 import { AgGridVue } from "ag-grid-vue";
 import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
-import axios from 'axios'
+import axios from "axios";
 export default {
   name: "Table",
   components: {
@@ -33,7 +33,6 @@ export default {
   },
   data() {
     return {
-      test: "123",
       gridOptions: null,
       gridApi: null,
       columnApi: null,
@@ -44,44 +43,26 @@ export default {
       msg: null,
     };
   },
-  sockets: { //прослушиваем события для получения данных с сервера
+  sockets: {
+    //прослушиваем события для получения данных с сервера
     connect: function () {
       console.log("socket connected");
     },
-    test: function (data) {
-      console.log(data)
+    getData: function (data) { //Получаем данные таблицы при загрузке страницы 
+      this.rowData = data;
     },
-    connet:function(date){
-      console.log(date)
-    }
+    conneсt: function (date) {
+  
+    },
+    column: function (data) { //Получаем столбцы таблицы при загрузке страницы 
+      this.columnDefs = data;
+    },
   },
 
   beforeMount() {
     this.gridOptions = {};
-    this.columnDefs = [
-      {
-        field: "Id",
-        minWidth: 160,
-      },
-      {
-        field: "First Name",
-        minWidth: 160,
-      },
-      { field: "Last Name" },
-      {
-        field: "Second Name",
-        minWidth: 140,
-      },
-      { field: "Price" },
-      {
-        field: "Status",
-        minWidth: 140,
-      },
-      {
-        field: "Date",
-        minWidth: 160,
-      },
-    ];
+    this.$socket.emit("column");
+
     this.defaultColDef = {
       flex: 1,
       minWidth: 100,
@@ -93,43 +74,14 @@ export default {
     this.gridColumnApi = this.gridOptions.columnApi;
   },
   methods: {
-    clickButton: function () {
-      // $socket is socket.io-client instance
-      console.log("click");
+    clickButton: function () { //тестовая отправка данных на сервер
       this.$socket.emit("test", { data: "test" });
     },
-
-    onGridReadys(params) {
+    onGridReadys(params) { //Получаем данные  ячейки по двойному клику 
       console.log(params);
     },
-    getSelectedRows() {
-      // const selectedNodes = this.gridApi.getSelectedNodes();
-      // const selectedData = selectedNodes.map((node) => node.data);
-      // const selectedDataStringPresentation = selectedData
-      //   .map((node) => node.make + " " + node.model)
-      //   .join(", ");
-      // alert(`Selected nodes: ${selectedDataStringPresentation}`);
-    },
     onGridReady(params) {
-      // const httpRequest = new XMLHttpRequest();
-      // const updateData = (data) => {
-      //   this.rowData = data;
-      // };
-
-      // httpRequest.open(
-      //   "GET",
-      //   "http://localhost:3000/people"
-      // );
-      // httpRequest.send();
-      // httpRequest.onreadystatechange = () => {
-      //   if (httpRequest.readyState === 4 && httpRequest.status === 200) {
-      //     updateData(JSON.parse(httpRequest.responseText));
-      //   }
-      // };
-      axios.get('http://localhost:3000/people')
-      .then(res=>{
-        console.log(res)
-      })
+      this.$socket.emit("dataTable", { data: "test" });
     },
   },
 };

@@ -1,10 +1,36 @@
 var app = require("express")();
 var http = require("http").createServer(app);
 var io = require("socket.io")(http);
-var cors =require('cors');
+var cors = require("cors");
 
-app.use(cors)
+app.use(cors);
+//Названия и параметры таблицы
+var columnDefs = [
+  {
+    field: "Id",
+    minWidth: 160,
+  },
+  {
+    field: "FirstName",
+    minWidth: 160,
+  },
+  { field: "LastName" },
+  {
+    field: "SecondName",
+    minWidth: 140,
+  },
+  { field: "Price" },
+  {
+    field: "Status",
+    minWidth: 140,
+  },
+  {
+    field: "Date",
+    minWidth: 160,
+  },
+];
 
+// Данные таблицы 
 var people = [
   {
     Id: "0",
@@ -26,16 +52,18 @@ var people = [
   },
 ];
 
-app.get('/people',(req,res)=>{
-  res.send('people')
-})
-
 io.on("connection", (socket) => {
   console.log("user connected");
-  socket.on("test", (msg) => {
-    console.log(msg);
-    io.emit('test', msg);
+   //Запрос на получение данных при загрузке страницы
+  socket.on("dataTable", () => {
+   //Отправка данных
+    io.emit("getData", people);
+  });
 
+  //Запрос на получение названия колонок 
+  socket.on("column", () => {
+      //Отправка колонок
+    io.emit("column", columnDefs);
   });
 
   socket.on("disconnect", () => {
