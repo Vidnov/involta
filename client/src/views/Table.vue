@@ -5,7 +5,8 @@
         style="width: 100%; height: 100%"
         class="ag-theme-alpine"
         id="myGrid"
-        @cellClicked="onGridReadys"
+        
+        @cellValueChanged="onGridReadys"
         :gridOptions="gridOptions"
         @grid-ready="onGridReady"
         :columnDefs="columnDefs"
@@ -17,7 +18,8 @@
         :components="components"
       ></ag-grid-vue>
     </div>
-    <button v-on:click="clickButton">Отправить</button>
+    
+    <button v-on:click="addItem()">Добавить cотрудника</button>
   </div>
 </template>
 
@@ -61,6 +63,9 @@ export default {
       //Получаем столбцы таблицы при загрузке страницы
       this.columnDefs = data;
     },
+    updateTable: function(data){
+       this.rowData = data;
+    }
   },
 
   beforeMount() {
@@ -79,18 +84,75 @@ export default {
     this.gridColumnApi = this.gridOptions.columnApi;
   },
   methods: {
+    cellEditorParams: function (params) {
+      var selectedCountry = params.data.country;
+
+      if (selectedCountry === "Ireland") {
+        return {
+          values: ["Dublin", "Cork", "Galway"],
+        };
+      } else {
+        return {
+          values: ["New York", "Los Angeles", "Chicago", "Houston"],
+        };
+      }
+    },
+    addItem:function(addIndex){
+       var newItems = [
+        createNewRowData()
+      ];
+
+       var res = this.gridApi.applyTransaction({
+        add: newItems,
+        addIndex: addIndex,
+      });
+      printResult(res);
+        this.$socket.emit("create", {});
+    },
     clickButton: function () {
       //тестовая отправка данных на сервер
       this.$socket.emit("test", { data: "test" });
     },
     onGridReadys(params) {
       //Получаем данные  ячейки по двойному клику
-      console.log(params);
+       this.$socket.emit("editTable",  params.data );
     },
     onGridReady(params) {
       this.$socket.emit("dataTable", { data: "test" });
     },
   },
+};
+//Создание новой строки в таблице 
+window.createNewRowData = function createNewRowData() {
+  var newData = {
+    Id: 3,
+    FirstName: '',
+    LastName: '',
+    SecondName:'',
+    Price: '',
+    Status: '',
+    Date:''
+  };
+  return newData;
+};
+
+window.printResult = function printResult(res) {
+  console.log('---------------------------------------');
+  if (res.add) {
+    res.add.forEach(function (rowNode) {
+      console.log('Added Row Node', rowNode);
+    });
+  }
+  if (res.remove) {
+    res.remove.forEach(function (rowNode) {
+      console.log('Removed Row Node', rowNode);
+    });
+  }
+  if (res.update) {
+    res.update.forEach(function (rowNode) {
+      console.log('Updated Row Node', rowNode);
+    });
+  }
 };
 // Редактирование даты
 window.getDatePicker = function getDatePicker() {

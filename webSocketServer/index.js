@@ -34,21 +34,19 @@ var columnDefs = [
     headerName: "Статус",
     field: "Status",
     minWidth: 140,
- //  cellEditor: 'agRichSelectCellEditor',
+    cellEditor: "cellEditorParams",
     cellEditorParams: {
       cellHeight: 50,
-      values: ['Ireland', 'USA'],
+      values: ["Ireland", "USA"],
     },
   },
   {
     headerName: "Дата Устройства",
     field: "Date",
     editable: true,
-    cellEditor: 'datePicker',
+    cellEditor: "datePicker",
   },
 ];
-
-
 
 // Данные таблицы
 var people = [
@@ -79,7 +77,27 @@ io.on("connection", (socket) => {
     //Отправка данных
     io.emit("getData", people);
   });
-
+  // Создание новой позиции 
+  socket.on("create", () => {
+    let count = people.forEach((element) => {
+      console.log(element);
+      return element.Id;
+    });
+    console.log(count);
+    people.push({ Id: people.length });
+    io.emit("updateTable", people);
+  });
+  socket.on("editTable", (msg) => {
+    console.log(people);
+    people = people.map((item, index, array) => {
+      if (item.Id == msg.Id) {
+        console.log(typeof item);
+        item = msg;
+      }
+      return item;
+    });
+    io.emit("updateTable", people);
+  });
   //Запрос на получение названия колонок
   socket.on("column", () => {
     //Отправка колонок
