@@ -5,7 +5,7 @@
         style="width: 100%; height: 100%"
         class="ag-theme-alpine"
         id="myGrid"
-        
+        @cellDoubleClicked="getEdit"
         @cellValueChanged="onGridReadys"
         :gridOptions="gridOptions"
         @grid-ready="onGridReady"
@@ -18,7 +18,7 @@
         :components="components"
       ></ag-grid-vue>
     </div>
-    
+
     <button v-on:click="addItem()">Добавить cотрудника</button>
   </div>
 </template>
@@ -37,6 +37,9 @@ export default {
   },
   data() {
     return {
+      config: {
+        edit: false,
+      },
       gridOptions: null,
       gridApi: null,
       columnApi: null,
@@ -63,9 +66,12 @@ export default {
       //Получаем столбцы таблицы при загрузке страницы
       this.columnDefs = data;
     },
-    updateTable: function(data){
-       this.rowData = data;
-    }
+    updateTable: function (data) {
+      this.rowData = data;
+    },
+    getConfig: function (data) {
+      this.config.edit = data;
+    },
   },
 
   beforeMount() {
@@ -84,6 +90,14 @@ export default {
     this.gridColumnApi = this.gridOptions.columnApi;
   },
   methods: {
+    getEdit: function (params) {
+      console.log(params)
+      var data = {
+        value:params.value,
+        params:params.data
+      }
+      this.$socket.emit("getConfig",data);
+    },
     cellEditorParams: function (params) {
       var selectedCountry = params.data.country;
 
@@ -97,17 +111,15 @@ export default {
         };
       }
     },
-    addItem:function(addIndex){
-       var newItems = [
-        createNewRowData()
-      ];
+    addItem: function (addIndex) {
+      var newItems = [createNewRowData()];
 
-       var res = this.gridApi.applyTransaction({
+      var res = this.gridApi.applyTransaction({
         add: newItems,
         addIndex: addIndex,
       });
       printResult(res);
-        this.$socket.emit("create", {});
+      this.$socket.emit("create", {});
     },
     clickButton: function () {
       //тестовая отправка данных на сервер
@@ -115,42 +127,42 @@ export default {
     },
     onGridReadys(params) {
       //Получаем данные  ячейки по двойному клику
-       this.$socket.emit("editTable",  params.data );
+      this.$socket.emit("editTable", params.data);
     },
     onGridReady(params) {
       this.$socket.emit("dataTable", { data: "test" });
     },
   },
 };
-//Создание новой строки в таблице 
+//Создание новой строки в таблице
 window.createNewRowData = function createNewRowData() {
   var newData = {
-    Id: 3,
-    FirstName: '',
-    LastName: '',
-    SecondName:'',
-    Price: '',
-    Status: '',
-    Date:''
+    Id: "",
+    FirstName: "",
+    LastName: "",
+    SecondName: "",
+    Price: "",
+    Status: "",
+    Date: "",
   };
   return newData;
 };
 
 window.printResult = function printResult(res) {
-  console.log('---------------------------------------');
+  console.log("---------------------------------------");
   if (res.add) {
     res.add.forEach(function (rowNode) {
-      console.log('Added Row Node', rowNode);
+      console.log("Added Row Node", rowNode);
     });
   }
   if (res.remove) {
     res.remove.forEach(function (rowNode) {
-      console.log('Removed Row Node', rowNode);
+      console.log("Removed Row Node", rowNode);
     });
   }
   if (res.update) {
     res.update.forEach(function (rowNode) {
-      console.log('Updated Row Node', rowNode);
+      console.log("Updated Row Node", rowNode);
     });
   }
 };

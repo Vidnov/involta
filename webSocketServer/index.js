@@ -47,26 +47,27 @@ var columnDefs = [
     cellEditor: "datePicker",
   },
 ];
+var config = [];
 
 // Данные таблицы
 var people = [
   {
-    Id: "0",
+    Id: 0,
     FirstName: "Никита",
     LastName: "Виднов",
     SecondName: "Алексеевич",
     Price: "30000",
     Status: "Работает",
-    Date: "18.12.2020",
+    Date: "18/12/2020",
   },
   {
-    Id: "1",
+    Id: 1,
     FirstName: "Иван",
     LastName: "Иванов",
     SecondName: "Иванович",
     Price: "30000",
     Status: "Работает",
-    Date: "28.12.2020",
+    Date: "28/12/2020",
   },
 ];
 
@@ -77,26 +78,48 @@ io.on("connection", (socket) => {
     //Отправка данных
     io.emit("getData", people);
   });
-  // Создание новой позиции 
+  //Создание ограничение на редактирование таблицы
+  socket.on("getConfig", (msg) => {
+    if (config != '') {
+      config.forEach((element) => {
+        if (element.Id == msg.params.Id) {
+          console.log("Ячейка возможно уже редактируется");
+          if (element.edit == msg.value) {
+            console.log("Ячейка уже редактируется");
+            io.emit("getConfig", "Ячейка уже редактируется");
+          }
+        } else {
+          console.log("Ячейка не редактируется");
+          config.push({ Id: msg.params.Id, edit: msg.value });
+          console.log(config);
+          io.emit("getConfig", config);
+        }
+      });
+    } else {
+      console.log("Ячейка не редактируется");
+      config.push({ Id: msg.params.Id, edit: msg.value });
+      console.log(config);
+      io.emit("getConfig", config);
+    }
+  });
+  // Создание новой позиции
   socket.on("create", () => {
-    let count = people.forEach((element) => {
-      console.log(element);
-      return element.Id;
-    });
-    console.log(count);
     people.push({ Id: people.length });
     io.emit("updateTable", people);
   });
   socket.on("editTable", (msg) => {
-    console.log(people);
     people = people.map((item, index, array) => {
       if (item.Id == msg.Id) {
-        console.log(typeof item);
         item = msg;
       }
       return item;
     });
+
     io.emit("updateTable", people);
+    //удаление запрета на изменение таблицы
+    config.forEach((element) => {
+      
+    });
   });
   //Запрос на получение названия колонок
   socket.on("column", () => {
