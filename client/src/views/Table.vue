@@ -1,11 +1,14 @@
 <template>
   <div>
+    {{ config.edit }}
     <div style="height: 90vh">
       <ag-grid-vue
         style="width: 100%; height: 100%"
         class="ag-theme-alpine"
         id="myGrid"
-        @cellDoubleClicked="getEdit"
+        @cellEditingStopped="editStoped"
+        @cellClicked="getEdit"
+        @cellDoubleClicked="edit"
         @cellValueChanged="onGridReadys"
         :gridOptions="gridOptions"
         @grid-ready="onGridReady"
@@ -38,7 +41,7 @@ export default {
   data() {
     return {
       config: {
-        edit: false,
+        edit: true,
       },
       gridOptions: null,
       gridApi: null,
@@ -90,13 +93,35 @@ export default {
     this.gridColumnApi = this.gridOptions.columnApi;
   },
   methods: {
-    getEdit: function (params) {
-      console.log(params)
+    //Потеря фокуса ячейки
+    editStoped: function (params) {
+      console.log('ok')
       var data = {
-        value:params.value,
-        params:params.data
-      }
-      this.$socket.emit("getConfig",data);
+        value: params.value,
+        params: params.data,
+      };
+      this.$socket.emit("editStoped", data);
+    },
+    //dubleclick
+    edit: function (params) {
+      var data = {
+        value: params.value,
+        params: params.data,
+      };
+      this.$socket.emit("edit", data);
+      params.colDef.editable = this.config.edit;
+    },
+    //Отправляем запрос на получение разрешения  редактирования ячейки params.colDef.editable:true
+    //click
+    getEdit: function (params) {
+      var data = {
+        value: params.value,
+        params: params.data,
+      };
+      this.$socket.emit("getConfig", data);
+
+      params.colDef.editable = this.config.edit;
+
     },
     cellEditorParams: function (params) {
       var selectedCountry = params.data.country;

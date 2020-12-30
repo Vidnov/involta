@@ -47,6 +47,7 @@ var columnDefs = [
     cellEditor: "datePicker",
   },
 ];
+
 var config = [];
 
 // Данные таблицы
@@ -80,33 +81,35 @@ io.on("connection", (socket) => {
   });
   //Создание ограничение на редактирование таблицы
   socket.on("getConfig", (msg) => {
-    if (config != '') {
+    if (config.length != 0) {
       config.forEach((element) => {
         if (element.Id == msg.params.Id) {
-          console.log("Ячейка возможно уже редактируется");
+          io.emit("getConfig", false);
           if (element.edit == msg.value) {
-            console.log("Ячейка уже редактируется");
-            io.emit("getConfig", "Ячейка уже редактируется");
+            io.emit("getConfig", false);
+            console.log("Ячейка уже редактируется!!!");
           }
         } else {
           console.log("Ячейка не редактируется");
-          config.push({ Id: msg.params.Id, edit: msg.value });
-          console.log(config);
-          io.emit("getConfig", config);
+          // config.push({ Id: msg.params.Id, edit: msg.value });
+          io.emit("getConfig", true);
         }
       });
     } else {
-      console.log("Ячейка не редактируется");
-      config.push({ Id: msg.params.Id, edit: msg.value });
-      console.log(config);
-      io.emit("getConfig", config);
+      console.log("Ни одна ячейка не редактируется");
+      io.emit("getConfig", true);
     }
+  });
+  //
+  socket.on("editStoped", (msg) => {
+    config = [];
   });
   // Создание новой позиции
   socket.on("create", () => {
     people.push({ Id: people.length });
     io.emit("updateTable", people);
   });
+  //Редактирование ячейки
   socket.on("editTable", (msg) => {
     people = people.map((item, index, array) => {
       if (item.Id == msg.Id) {
@@ -114,17 +117,20 @@ io.on("connection", (socket) => {
       }
       return item;
     });
+    
 
     io.emit("updateTable", people);
-    //удаление запрета на изменение таблицы
-    config.forEach((element) => {
-      
-    });
   });
   //Запрос на получение названия колонок
   socket.on("column", () => {
     //Отправка колонок
     io.emit("column", columnDefs);
+  });
+
+  socket.on("edit", (msg) => {
+    console.log(msg)
+    config.push({ Id: msg.params.Id, edit: msg.value });
+    console.log(config)
   });
 
   socket.on("disconnect", () => {
